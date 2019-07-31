@@ -1,9 +1,13 @@
+# Variant Caller Format (VCF) File Manipulation, Visualization, and Analysis
+
+## Introduction
+A recent project involved manipulating and visualizing output from Variant Caller Format (VCF) files. The required tasks are only vaguely connected, so this repository is a cookbook for file manipulation and visualization tasks. Each commit is a python script with an explanation, which can be run by itself, within a Jupyter Notebook, or as a part of a larger workflow.
+
 ## Overview
 Before beginning, it is **strongly** recommended to review the [VCF 4.0 specifications](https://samtools.github.io/hts-specs/VCFv4.2.pdf). It is also **strongly** recommended that the reader has a basic grasp of Biological concepts, and/or has [read through this guide](https://github.com/disulfidebond/Biology-for-ComputerScientists). The comments and code contained in this writeup will assume a basic understanding of the VCF format, and the data that is reported in VCF files.
 
 Before continuing, I also should note that [GATK Tools](https://software.broadinstitute.org/gatk/download/) or [picard](https://broadinstitute.github.io/picard/), or the [IGV Viewer](https://software.broadinstitute.org/software/igv/download) from the Broad Institute may be completely sufficient for your needs. A description of the various commands for these software applications is well beyond the scope of this writeup, but along with Python and Bash commands, they are periodically mentioned to provide an in-depth description of what information can be contained within a VCF file. 
 
-## Methods
 The VCF format is similar to the Library of Congress: there's a wealth of information contained therein, but you need to understand how the [Classification System works](https://www.loc.gov/catdir/cpso/lcco/), or you're going to have an extremely difficult time finding anything. A Variant Caller Format (VCF) file contains numerous information lines (called 'meta-information' lines), which describe terms that will be used in the body of the VCF file. 
 
 ### Methods Introduction
@@ -25,23 +29,6 @@ The Description of Stuff section must follow the framework described in the VCF 
 * **Header line**
 * **Data that is formatted using the syntax described in the Description of Stuff**
 
-
-There is no limit to the number of these lines, and in the Cyno.box13.indels.hg38.vcf.gz gzipped VCF file, there are 506 lines of meta-information, and one header line. For example, in the vcf file Cyno.box13.snps.hg38.vcf.gz, this means that the first 507 lines of the document will contain information on how to read the rest of the document. VCF files are technically human readable, but realistically, you should write or [use a program](https://software.broadinstitute.org/software/igv/download) to read them for you.
-
-If you want to remove the metadata and header lines, you could do:
-
-
-        # bash
-        DOCLEN=$(gzcat Cyno.box13.snps.hg38.geneListFiltered.vcf.gz | wc -l )
-        # find position where metadata and header end
-        gzcat Cyno.box13.snps.hg38.geneListFiltered.vcf.gz | grep -n 'chr1' 
-        # TRIMSTART=((DOCLEN-HEADERSTOP))
-        # in this case, TRIMSTART == line 895, where you will set the tail command:
-        gzcat Cyno.box13.snps.hg38.geneListFiltered.vcf.gz | tail -n 895 | less
-        
-For filtering based on specific criteria, [you can also use GATK Tools](https://software.broadinstitute.org/gatk/documentation/tooldocs/current/), [as well as picard](https://broadinstitute.github.io/picard/javadoc/picard/index.html?picard/vcf/filter/FilterVcf.html).
-
-### Methods I
 For something more concrete, consider the following segment from a VCF file.
 
 **Metadata Lines**, More on this in a moment.
@@ -117,6 +104,26 @@ The first entry, 'GT:AD:DP:GQ:PL', indicates what data is contained and for each
 Genotype:AlleleicDepth:ReadDepth:GenotypeQuality:PhredLikelihood
 
 See the INFO lines above for more inforamtion on each. On a final note, the Genotype will be a string with the format 'N/N', where N is an integer (usually 0 or 1), which describes the predicted genotype of that sample.
+
+### Task I: Load VCF file in Pandas
+
+There is no limit to the number of header lines, and in the example gzipped VCF file, there are 506 lines of meta-information, and one header line. This means that the first 507 lines of the document will contain information on how to read the rest of the document. VCF files are technically human readable, but realistically, you should write or [use a program](https://software.broadinstitute.org/software/igv/download) to read them for you.
+
+You need to remove these header lines to view it in Pandas. One way to do so is:
+
+
+        # bash
+        DOCLEN=$(gzcat Cyno.box13.snps.hg38.geneListFiltered.vcf.gz | wc -l )
+        # find position where metadata and header end
+        gzcat Cyno.box13.snps.hg38.geneListFiltered.vcf.gz | grep -n 'chr1' 
+        # TRIMSTART=((DOCLEN-HEADERSTOP))
+        # in this case, TRIMSTART == line 895, where you will set the tail command:
+        gzcat Cyno.box13.snps.hg38.geneListFiltered.vcf.gz | tail -n 895 | less
+        
+For filtering based on specific criteria, [you can also use GATK Tools](https://software.broadinstitute.org/gatk/documentation/tooldocs/current/), [as well as picard](https://broadinstitute.github.io/picard/javadoc/picard/index.html?picard/vcf/filter/FilterVcf.html).
+
+### Methods I
+
 
 ### Methods II
 To view a VCF file, you could use less:
