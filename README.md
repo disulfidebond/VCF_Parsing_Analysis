@@ -175,5 +175,40 @@ The code for this can be found [here](https://github.com/disulfidebond/VCF_Parsi
 
 
 ### Task IV: Rename columns when multiple samples are present.
+If you only have one sample that you would like to rename, [you can use picard via GATK tools](https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.0.0/picard_vcf_RenameSampleInVcf.php).
+
+If you have multiple samples, this becomes a bit trickier. First, you need to create a text file with the sample names and the group:
+        
+        GroupID,VCF_sampleID
+        0,22110
+        1,22111
+        3,22112
+        1,22113
+        2,22114
+        2,22115
+        0,22116
+
+Next, import the data into a dictionary of {'OriginalValue':'ModifiedValue'}.  Finally, use the rename() command to rename the pandas dataframe. Be sure to create a new dataframe, and not just update the existing one.
 
 [A python script has been created with this code within this repository](https://github.com/disulfidebond/VCF_Parsing_Analysis/blob/master/vcf_modify_sample_names.py).
+
+### Task V: Group samples by category
+VCF files are usually displayed in IGV linearly, meaning samples are listed in a track from the first entry in the VCF file and ending at the last entry. To group them, you could split the VCF file into multiple files with each group of samples (see 'gotcha' below), or you can group them within the same file.
+
+To group samples together within the same file, care must be taken to ensure that the column of data in the dataframe follows the re-ordering of columns. One simple approach is similar to Task IV, and sorts/reorders column names within a list, and then creates a new dataframe using the list of reordered column names as keys for pandas: 
+
+        list(filter(lambda x: x[0:7] == 'Control', columnID_list))
+        list(filter(lambda x: x[0:7] == 'Treated', columnID_list))
+
+Or you can just create it by hand:
+
+        columnID_list = ['Control_22111', 'Control_22004', 'Treated_22005', 'Treated_22009']
+        
+Then create the new dataframe:
+
+        reordered_df = original_df[columnID_list]
+        
+        
+* 'Gotcha': The calculations and predictions within a VCF file usually encompass **all** samples. If you break apart a set of samples into groups, and then split the VCF file, the calculations may not be valid any longer for the sub-groups that you create. However, if this is done solely for the purpose of visualization, then the predicted and calculated values will be shown in tracks for each sub-group as a part of the whole group of all tracks in IGV.
+
+### Task VI: Statistics on dataframe values
