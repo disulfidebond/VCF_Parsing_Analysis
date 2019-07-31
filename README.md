@@ -1,7 +1,7 @@
 # Variant Caller Format (VCF) File Manipulation, Visualization, and Analysis
 
 ## Introduction
-A recent project involved manipulating and visualizing output from Variant Caller Format (VCF) files. The required tasks are only vaguely connected, so this repository is a cookbook for file manipulation and visualization tasks. Each commit is a python script with an explanation, which can be run by itself, within a Jupyter Notebook, or as a part of a larger workflow.
+A recent project involved manipulating and visualizing output from Variant Caller Format (VCF) files. The required tasks are only vaguely connected, so this repository is a cookbook for file manipulation and visualization tasks. Each subsection contains code with an explanation.  The code is either within this README, or linked within this repo, and it can be run by itself, within a Jupyter Notebook, or as a part of a larger workflow.
 
 ## Overview
 Before beginning, it is **strongly** recommended to review the [VCF 4.0 specifications](https://samtools.github.io/hts-specs/VCFv4.2.pdf). It is also **strongly** recommended that the reader has a basic grasp of Biological concepts, and/or has [read through this guide](https://github.com/disulfidebond/Biology-for-ComputerScientists). The comments and code contained in this writeup will assume a basic understanding of the VCF format, and the data that is reported in VCF files.
