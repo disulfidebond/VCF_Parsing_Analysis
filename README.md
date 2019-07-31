@@ -169,7 +169,7 @@ Pandas has several built-in tools that can accomplish this directly, or with som
 
 To obtain a count of genotypes, first create a list of identifiers for each sample.  This assumes you have more than one sample; if you have only one sample in the VCF file, it is strongly recommended to use GATK tools instead.
 
-Then, pull the genotype data from a column, and filter out the genotype of interest. Finally, do calculations on the filtered data, such as mean.  Keep in mind that the filtered data is a sum of genotypes, irrespective of sample. For more in-depth statistical calculations, see [Task IV]().
+Then, pull the genotype data from a column, and filter out the genotype of interest. Finally, do calculations on the filtered data, such as mean.  Keep in mind that the filtered data is a sum of genotypes, irrespective of sample. For more in-depth statistical calculations, see [Task VI](https://github.com/disulfidebond/VCF_Parsing_Analysis/blob/master/README.md#task-vi-statistics-on-dataframe-values).
 
 The code for this can be found [here](https://github.com/disulfidebond/VCF_Parsing_Analysis/blob/master/vcf_column_counts.py)
 
