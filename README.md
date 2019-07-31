@@ -111,101 +111,55 @@ There is no limit to the number of header lines, and in the example gzipped VCF 
 
 You need to remove these header lines to view it in Pandas. One way to do so is:
 
-
-        # bash
-        DOCLEN=$(gzcat Cyno.box13.snps.hg38.geneListFiltered.vcf.gz | wc -l )
-        # find position where metadata and header end
-        gzcat Cyno.box13.snps.hg38.geneListFiltered.vcf.gz | grep -n 'chr1' 
-        # TRIMSTART=((DOCLEN-HEADERSTOP))
-        # in this case, TRIMSTART == line 895, where you will set the tail command:
-        gzcat Cyno.box13.snps.hg38.geneListFiltered.vcf.gz | tail -n 895 | less
-        
-For filtering based on specific criteria, [you can also use GATK Tools](https://software.broadinstitute.org/gatk/documentation/tooldocs/current/), [as well as picard](https://broadinstitute.github.io/picard/javadoc/picard/index.html?picard/vcf/filter/FilterVcf.html).
-
-### Methods I
-
-
-### Methods II
-To view a VCF file, you could use less:
-
-        gzcat some_compressed_vcf.vcf.gz | less
-
-You could also import it into pandas:
-
-        import pandas as pd
-        import numpy as np
-        
-        vcfDF = pd.read_csv(some_uncompressed_vcf.vcf', sep='\t')
-        vcfDF.head()
-        
-Note that if you import it into pandas, the metadata and header lines may cause the table to be malformed.  These lines can be removed with something similar to:
-
         # bash
         DOCLEN=$(gzcat some_compressed_vcf.vcf.gz | wc -l)
         # find position where metadata and header end
         gzcat some_compressed_vcf.vcf.gz | grep -n 'chr1' 
         # in this case, DOCLEN-HEADERSTOP == line 895, where you will set the tail command:
         gzcat some_compressed_vcf.vcf.gz | tail -n 895 | less
-        
-If you only wanted to view the INFO column, you could do something similar to:
 
-        # bash
-        gzcat some_compressed_vcf.vcf.gz | tail -n 895 | cut -d$'\t' -f8 | less
-        
-### Methods III
-To parse the data, you could use python pandas, and verify it with Bash:
+To load the file (minus the metadata) into pandas, use a simple _read_csv()_ command:
 
         import pandas as pd
         import numpy as np
         
-        vcfDF = pd.read_csv('Cyno.box13.snps.hg38.geneListFiltered.vcf.tsv', sep='\t')
+        vcfDF = pd.read_csv('exampleVCF.noHeader.vcf.tsv', sep='\t')
         vcfDF.head()
         
-        # create list with column IDs
-        colIDS = ['FORMAT']
-        for i in range(40156, 40226):
-            iString = str(i)
-            colIDS.append(iString)
-        print(colIDS)
-        vcf_samplesDF = pd.DataFrame(vcfDF, columns=colIDS)
-        # preview data
-        vcf_samplesDF.head()
-        
-        # filter out only the Genotype Tag:
-        rVals = []
-        for index,row in vcf_samplesDF.iterrows():
-            rVal = []
-        for cIdx in colIDS:
-            rValueRow = row[cIdx]
-            rValueList = rValueRow.split(':')
-            rValue = rValueList[0]
-            rVal.append(rValue)
-        rVals.append(rVal)
+To view a VCF file in Bash, use _less_:
 
-        parsed_samplesDF_vcf = pd.DataFrame(rVals, columns=colIDS)
-        # preview data
-        parsed_samplesDF_vcf.head()
-
-        # check the data:
-        parsed_samplesDF_vcf['40156'].value_counts()
-        # outputs 
-        0/0    505
-        0/1    168
-        1/1    152
-        1/0     62
-        ./.      7
-        Name: 40156, dtype: int64
+        gzcat some_compressed_vcf.vcf.gz | less
+        # or if uncompressed
+        less some_uncompreessed_vcf.vcf
         
-        # check again with Bash from Jupyter Notebook, remove the '!' to run in a Bash session
-        !gzcat Cyno.box13.snps.hg38.geneListFiltered.vcf.gz | tail -n 895 | cut -d$'\t' -f10 | grep -c '^0/0'
-        !gzcat Cyno.box13.snps.hg38.geneListFiltered.vcf.gz | tail -n 895 | cut -d$'\t' -f10 | grep -c '^0/1'
-        !gzcat Cyno.box13.snps.hg38.geneListFiltered.vcf.gz | tail -n 895 | cut -d$'\t' -f10 | grep -c '^1/1'
-        !gzcat Cyno.box13.snps.hg38.geneListFiltered.vcf.gz | tail -n 895 | cut -d$'\t' -f10 | grep -c '^1/0'
-        
-        # outputs
-        505
-        168
-        152
-        62
 
-From here, continue to the [Analysis and Visualization](https://github.com/disulfidebond/VCF_Parsing_Analysis/blob/master/Analysis_and_Visualization.md) writeup.
+If you only wanted to view the INFO column, you could do something similar to:
+
+        # bash, the integer for the tail command is the start of the data described previously
+        gzcat some_compressed_vcf.vcf.gz | tail -n 895 | cut -d$'\t' -f8 | less
+        
+        # python without pandas
+        vcf_list = []
+        colID_toParse = -1
+        header = True
+        with open('some_uncompreessed_vcf.vcf', 'r') as fOpen:
+          for i in fOpen:
+            i = i.rstrip('\r\n')
+            iSplit = i.split('\t')
+            if header:
+              header = False
+              try:
+                loc = iSplit.index('INFO')
+                colID_toParse = int(loc)
+              except ValueError:
+                print('Error, INFO column not present in header!  Please check file. Exiting...')
+                break
+            else:
+              vcf_list.append(iSplit[colID_toParse])
+        for i in vcf_list:
+          print(i)
+             
+### Task II: Parse out specific data
+To parse the data, you could use python pandas, and verify it with Bash. [This python file has the code](https://github.com/disulfidebond/VCF_Parsing_Analysis/blob/master/parse_data_from_vcf.py)
+
+Note that for filtering based on specific criteria, [you can also use GATK Tools](https://software.broadinstitute.org/gatk/documentation/tooldocs/current/), [as well as picard](https://broadinstitute.github.io/picard/javadoc/picard/index.html?picard/vcf/filter/FilterVcf.html).
