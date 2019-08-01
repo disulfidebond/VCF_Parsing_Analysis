@@ -216,9 +216,65 @@ Then create the new dataframe:
 ### Task VII: Parse out genotypes only
 In the Genotype columns for each sample will begin with the genotype, and then include additional information about the genotype call. If all you are interested in is the genotype, then you can extract this by parsing out the value from that column. Depending on what you want to do next, you can do analyses with that data, replace the data in that column, or create a new dataframe with this data.
 
-The python script []() has suggestions on how to accomplish all of these tasks.
+The Genotype column has the format
+
+        0/0:72,0:72:99:0,120,1800
+
+As a reminder, the values are described in the metadata lines.
+
+These genotypes can be parsed using the following:
+
+
+        # create list of column IDs, assumes IDs are integers within specified range
+        colIDS = ['FORMAT']
+        for i in range(40227, 40297):
+          iString = str(i)
+          colIDS.append(iString)
+        print(colIDS)
+        vcf_samplesDF = pd.DataFrame(vcfDF, columns=colIDS)
+        vcf_samplesDF.head()
+        
+        # parse out values to list
+        rVals = []
+        for index,row in vcf_samplesDF.iterrows():
+          rVal = []
+          for cIdx in colIDS:
+            rValueRow = row[cIdx]
+            rValueList = rValueRow.split(':')
+            rValue = rValueList[0]
+            rVal.append(rValue)
+        rVals.append(rVal)
+
+        # create/modify dataframe using these values, then preview it
+        parsed_samplesDF_vcf = pd.DataFrame(rVals, columns=colIDS)
+        parsed_samplesDF_vcf.head()
+
 
 ### Task VIII: Filter out synonymous or nonsynonymous variants
 Similar to Task VII, the approach here is to run a regular expression search on the INFO column, and then parse out values. You can modify the regular expression as needed to be more or less stringent.
 
-The python script []() has suggestions on how to accomplish all of these tasks.
+
+        # create list of column IDs, assumes IDs are integers within specified range
+        colIDS = ['FORMAT']
+        for i in range(2011, 2019):
+          iString = str(i)
+          colIDS.append(iString)
+        print(colIDS)
+        vcf_samplesDF = pd.DataFrame(vcfDF, columns=colIDS)
+
+        rVals = []
+        rgxTerm = 'nonsynonymous'
+        for index,row in vcf_samplesDF.iterrows():
+          rVal = []
+          for cIdx in colIDS:
+            rValueRow = row[cIdx]
+              # re.search will find the first instance and then return true
+              # re.findall will find all instances, which could be useful if additional filtering is necessary
+              m = re.search(rValueRow, rgxTerm)
+              if m:
+                rVal.append(rValue)
+          rVals.append(rVal)
+        
+        # create/modify dataframe using these values, then preview it
+        parsed_samplesDF_vcf = pd.DataFrame(rVals, columns=colIDS)
+        parsed_samplesDF_vcf.head()
