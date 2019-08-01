@@ -209,6 +209,16 @@ Then create the new dataframe:
         reordered_df = original_df[columnID_list]
         
         
-* 'Gotcha': The calculations and predictions within a VCF file usually encompass **all** samples. If you break apart a set of samples into groups, and then split the VCF file, the calculations may not be valid any longer for the sub-groups that you create. However, if this is done solely for the purpose of visualization, then the predicted and calculated values will be shown in tracks for each sub-group as a part of the whole group of all tracks in IGV.
+* 'Gotcha': The calculations and predictions within a VCF file usually encompass **all** samples. If you break apart a set of samples into sub-groups, and then split the VCF file, the calculations may not be valid any longer for the sub-groups that you create. However, if this is done solely for the purpose of visualization, then the predicted and calculated values will be shown in tracks for each sub-group as a part of the whole group of all tracks in IGV.
 
 ### Task VI: Statistics on dataframe values
+
+### Task VII: Parse out genotypes only
+In the Genotype columns for each sample will begin with the genotype, and then include additional information about the genotype call. If all you are interested in is the genotype, then you can extract this by parsing out the value from that column. Depending on what you want to do next, you can do analyses with that data, replace the data in that column, or create a new dataframe with this data.
+
+The python script []() has suggestions on how to accomplish all of these tasks.
+
+### Task VIII: Filter out synonymous or nonsynonymous variants
+Similar to Task VII, the approach here is to run a regular expression search on the INFO column, and then parse out values. You can modify the regular expression as needed to be more or less stringent.
+
+The python script []() has suggestions on how to accomplish all of these tasks.
