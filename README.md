@@ -233,19 +233,27 @@ The value is first calculated using the Phred Score for log likelihood, meaning 
 
 To conduct statistical calculations on these values, you could parse out the genotype field for only homozygous alternative genotype '1/1', and only select PL values with exceedingly high confidence, then count the number of occurrences of each for a Chi-Squared test:
 
-        # this will output a pandas series of 'True,False,...' 
-        # of row entries in the SampleName column that match the literal string for homozygous reference genotype
-        col = vcfDF_reordered['SampleName'].str.contains('0/0') 
+        # this command will output a pandas series of 'True,False,...' 
+        # of row entries in the SampleName column that match the literal string for homozygous alternative genotype
+        col = vcfDF_reordered['SampleName'].str.contains('1/1') 
         # output
         # 0    True
         # 1    False
         # ...
 
-        # this will output a pandas series of 'True,False,...'
+        # another possibility is to select the data from pandas, and then parse out the values you want to a list
+        x = vcfDF_reordered['SampleName'].to_list()
+        xRes = []
+        for i in x:
+          splitRow = x.split(':')
+          xRes.append(splitRow[0])
+        
+        # this command will output a pandas series of 'True,False,...'
         # of row entries in the SampleName column that match the regex pattern for any allele with reference allele
         col = vcfDF_reordered['SampleName'].str.contains('\d\/0', regex=True)
 
-        # this will count the number of instances where this occurred, which you can then use for mean, STD, or a Chi-Sq test
+        # finally, you can count the number of instances where this occurred
+        # which you can then use for mean, STD, or a Chi-Sq test
         x.value_counts()
         # output
         # False    18773
