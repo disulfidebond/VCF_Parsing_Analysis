@@ -254,7 +254,7 @@ To conduct statistical calculations on these values, you could parse out the gen
 
         # finally, you can count the number of instances where this occurred
         # which you can then use for mean, STD, or a Chi-Sq test
-        x.value_counts()
+        col.value_counts()
         # output
         # False    18773
         # True      200
