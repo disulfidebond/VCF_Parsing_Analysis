@@ -212,6 +212,47 @@ Then create the new dataframe:
 * 'Gotcha': The calculations and predictions within a VCF file usually encompass **all** samples. If you break apart a set of samples into sub-groups, and then split the VCF file, the calculations may not be valid any longer for the sub-groups that you create. However, if this is done solely for the purpose of visualization, then the predicted and calculated values will be shown in tracks for each sub-group as a part of the whole group of all tracks in IGV.
 
 ### Task VI: Statistics on dataframe values
+Performing statistical analyses of any kind on VCF data is neither for the faint of heart nor the weak in knowledge of statistics. I strongly advise everyone to first try GATK tools. If this does not suit your needs, and you have a strong understanding of statistics, then keep reading.
+
+An exhaustive description of all the INFO fields and/or Genotype fields is well beyond the scope of this writeup. What follows will be the basics of calculating the likelihoods of a called genotype, which hopefully will provide the foundation for additional calculations.
+
+Nearly all VCF files will contain the following fields:
+
+        GT:AD:DP:GQ:PL
+        
+As a brief recap, this indicates:
+
+        Genotype:AlleleDepth:DepthOfReads:GenotypeQuality:Phred-scaledGenotypeLikelihood
+        
+For detailed descriptions of what the fields indicate, see [the section above](https://github.com/disulfidebond/VCF_Parsing_Analysis#methods-introduction).
+The Genotype field will always show the called genotype as Ref/Alt. The Genotype Quality is the conditional probability for the genotype quality, or the conditional probability that the called genotype is **wrong**.
+
+The Phred-Scaled Genotype Quality may be reported as the Genotype Likelihood (GL) may be reported instead of the Phred-scaled Genotype Quality. The primary difference is the GL value is a float instead of an integer, and the PL value is scaled. 
+
+The value is first calculated using the Phred Score for log likelihood, meaning the value is the probability that the variant caller **incorrectly** determined the genotype. Small values indicate high confidence, large values indicate low confidence. Then, the value is scaled by the lowest score for the possible genotypes. This means that there will always be a '0' value, which indicates the highest confidence that the variant caller was correct, followed by larger values for the other possible genotypes on a log scale. Since the values are on a log scale, the confidence in the variant call can be distinguished easily.
+
+To conduct statistical calculations on these values, you could parse out the genotype field for only homozygous alternative genotype '1/1', and only select PL values with exceedingly high confidence, then count the number of occurrences of each for a Chi-Squared test:
+
+        # this will output a pandas series of 'True,False,...' 
+        # of row entries in the SampleName column that match the literal string for homozygous reference genotype
+        col = vcfDF_reordered['SampleName'].str.contains('0/0') 
+        # output
+        # 0    True
+        # 1    False
+        # ...
+
+        # this will output a pandas series of 'True,False,...'
+        # of row entries in the SampleName column that match the regex pattern for any allele with reference allele
+        col = vcfDF_reordered['SampleName'].str.contains('\d\/0', regex=True)
+
+        # this will count the number of instances where this occurred, which you can then use for mean, STD, or a Chi-Sq test
+        x.value_counts()
+        # output
+        # False    18773
+        # True      200
+        # Name: SampleName, dtype: int64
+
+Sources for this section were [GATK forums](https://gatkforums.broadinstitute.org/gatk/discussion/5913/math-notes-how-pl-is-calculated-in-haplotypecaller) and [drive5](https://drive5.com/usearch/manual/quality_score.html)
 
 ### Task VII: Parse out genotypes only
 In the Genotype columns for each sample will begin with the genotype, and then include additional information about the genotype call. If all you are interested in is the genotype, then you can extract this by parsing out the value from that column. Depending on what you want to do next, you can do analyses with that data, replace the data in that column, or create a new dataframe with this data.
